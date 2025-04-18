@@ -21,36 +21,53 @@ void ausgabe(uint8_t Channel, uint8_t Data) {
 
     // Steuerleitungen aktivieren
     digitalWrite(RST, LOW); // Reset aktivieren
-    delayMicroseconds(10); // Kurze Pause für Reset
+    delayMicroseconds(10);
     digitalWrite(RST, HIGH); // Reset deaktivieren
 
     // Daten laden
-    digitalWrite(Load_Data, HIGH); // Daten laden aktivieren
-    delayMicroseconds(10); // Kurze Pause für Laden der Daten
-    digitalWrite(Load_Data, LOW); // Daten laden deaktivieren
+    digitalWrite(Load_Data, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(Load_Data, LOW);
 
     // Ausgabe aktivieren
-    digitalWrite(P_AV, HIGH); // Ausgabe aktivieren
-    delayMicroseconds(10); // Kurze Pause für Laden der Daten
-
-    
+    digitalWrite(P_AV, HIGH);
+    delayMicroseconds(10);
 }
-  
 
 void abspielen() {
     Serial.println("Starte Abspielen der Daten...");
-  
-    for (const auto& [channel, data] : kanalDaten) {
-        Serial.print("Kanal: ");
-        Serial.print(channel.c_str());
-        Serial.print(" - Daten: ");
-        for (const auto& value : data) {
-            Serial.print(value, 2);
-            Serial.print(" ");
+
+    constexpr float minEEG = -100.0f; // mV
+    constexpr float maxEEG = 100.0f;  // mV
+
+    // Maximale Länge aller Kanäle bestimmen
+    size_t maxLength = 0;
+    for (const auto& [_, data] : kanalDaten) {
+        if (data.size() > maxLength) {
+            maxLength = data.size();
         }
-        Serial.println();
-        
-        // Hier wird die Funktion zum Ausgeben der Daten aufgerufen
-        ausgabe(channel.toInt(), static_cast<uint8_t>(data[0]));
     }
+
+    for (size_t i = 0; i < maxLength; ++i) {
+        for (const auto& [channel, data] : kanalDaten) {
+            // Wenn Index gültig, echten Wert verwenden, sonst 0 mV
+            float value = (i < data.size()) ? data[i] : 0.0f;
+
+            float normalized = (value - minEEG) / (maxEEG - minEEG);
+            normalized = constrain(normalized, 0.0f, 1.0f);
+            uint8_t intValue = static_cast<uint8_t>(normalized * 255.0f);
+
+            Serial.print("Kanal ");
+            Serial.print(channel);
+            Serial.print(" → ");
+            Serial.print(value, 2);
+            Serial.print(" mV → DAC-Wert: ");
+            Serial.println(intValue);
+
+            ausgabe(channel.toInt(), intValue);
+        }
+        delay(10); // Taktrate
+    }
+
+    Serial.println("Abspielen der Daten abgeschlossen.");
 }
