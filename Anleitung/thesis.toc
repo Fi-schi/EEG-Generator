@@ -1,0 +1,13 @@
+\babel@toc {ngerman}{}\relax 
+\contentsline {chapter}{\numberline {1}Einleitung}{4}{chapter.1}%
+\contentsline {subsubsection}{\nonumberline Zielsetzung und Anforderungen}{4}{subsubsection*.7}%
+\contentsline {subsubsection}{\nonumberline Komponentenübersichet}{5}{subsubsection*.9}%
+\contentsline {subsubsection}{\nonumberline Schaltungsdesign}{6}{subsubsection*.11}%
+\contentsline {chapter}{\numberline {2}Zusammenfassung und Ausblick}{8}{chapter.2}%
+\contentsline {chapter}{Anhang \numberline {A}Beispielanlage}{9}{appendix.1.A}%
+\contentsline {chapter}{\nonumberline Abbildungsverzeichnis}{10}{chapter*.13}%
+\contentsline {chapter}{\nonumberline Tabellenverzeichnis}{11}{chapter*.14}%
+\contentsline {chapter}{\nonumberline Algorithmenverzeichnis}{12}{chapter*.15}%
+\contentsline {chapter}{\nonumberline Quellcodeverzeichnis}{13}{chapter*.16}%
+\contentsline {chapter}{Selbstständigkeitserklärung}{14}{chapter*.17}%
+\providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 
