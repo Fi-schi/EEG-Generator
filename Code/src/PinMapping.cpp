@@ -11,16 +11,20 @@ void initPinModes() {
   pinMode(DB5, OUTPUT);
   pinMode(DB6, OUTPUT);
   pinMode(DB7, OUTPUT);
+  pinMode(DB8, OUTPUT);
+  pinMode(DB9, OUTPUT);
+  pinMode(DB10, OUTPUT);
+  pinMode(DB11, OUTPUT);
 
   // Adressleitungen
   pinMode(ADD0, OUTPUT);
   pinMode(ADD1, OUTPUT);
-  pinMode(ADD2, OUTPUT);
-  pinMode(ADD3, OUTPUT);
 
   // Steuerleitungen
   pinMode(RST, OUTPUT);
   pinMode(Load_Data, OUTPUT);
-  pinMode(P_AV, OUTPUT);
-  pinMode(P_RD, OUTPUT);
+  pinMode(R_W, OUTPUT);
+  pinMode(CS, OUTPUT);
+  digitalWrite(CS, HIGH); // Inaktiv setzen
+  
 }

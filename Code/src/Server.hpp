@@ -17,9 +17,8 @@
 #include "Spannungswandlung.hpp"
 
 // Funktionsprototypen
-void setupWiFi();
-void setupFileSystem();
 void setupWebServer();
+void setupRoutes(AsyncWebServer& server);
 
 std::vector<float> extractNumbersRegex(const String &content);
 String generateUniqueFileName(const String& baseName);

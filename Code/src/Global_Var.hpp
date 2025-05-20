@@ -13,8 +13,8 @@
 #include <cmath>
 
 // WiFi-Zugangsdaten
-extern const char* ssid;
-extern const char* password;
+//extern const char* ssid;
+//extern const char* password;
 
 // Globale Serverinstanzen
 extern AsyncWebServer server;

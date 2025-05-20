@@ -5,7 +5,11 @@
 #include <map>
 #include <cmath>
 
-void abspielen();
 
-void ausgabe(uint8_t Channel, uint8_t Data);
+void ausgabe(char Channel, uint16_t Data);
+
+void startAbspielTask();
+
+extern int ausgabeFrequenzHz;
+
 #endif // SPANNUNGSWANDLUNG_H

@@ -102,7 +102,7 @@ window.onload = function () {
     fetch('/getFiles')
       .then(response => response.json())
       .then(data => {
-        uploadedFiles = data.files.map(file => ({ name: file, selected: false, channel: "CH_1" }));
+        uploadedFiles = data.files.map(file => ({ name: file, selected: false, channel: "CH_A" }));
         displayFiles();
       })
       .catch(error => console.error('Fehler beim Abrufen der Dateiliste: ', error));
@@ -149,7 +149,7 @@ window.onload = function () {
   
       const channelSelect = document.createElement("select");
       channelSelect.className = "channel-select";
-      ["CH_1", "CH_2", "CH_3", "CH_4"].forEach(ch => {
+      ["CH_A", "CH_B", "CH_C", "CH_D"].forEach(ch => {
         const option = document.createElement("option");
         option.value = ch;
         option.textContent = ch;
@@ -193,32 +193,36 @@ window.onload = function () {
   }
   
   function processFiles() {
-    const selectedFiles = uploadedFiles.filter(file => file.selected);
-    if (selectedFiles.length === 0) {
-      alert("Keine Dateien ausgewählt. Bitte markieren Sie die gewünschten Dateien.");
-      return;
-    }
-    document.getElementById('processingPopup2').style.display = 'block';
-    let channels = selectedFiles.map(file => ({ name: file.name, channel: file.channel }));
-    const formData = new FormData();
-    formData.append('channels', JSON.stringify(channels));
-    fetch('/processFiles', {
-      method: 'POST',
-      body: formData,
-    })
-    .then(response => {
-      if (!response.ok) throw new Error('Verarbeitung fehlgeschlagen');
-      return response.json();
-    })
-    .then(data => {
-        displayResults(data.results);
-        document.getElementById('processingPopup2').style.display = 'none';
-        processingComplete = true;
-      })
-      .catch(error => {
-        console.error('Fehler beim Senden der Dateien: ', error);
-        document.getElementById('processingPopup2').style.display = 'none';
-        alert('Verarbeitung fehlgeschlagen. Bitte erneut versuchen.');
+    // Vor der Verarbeitung: Kanaldaten auf dem Server zurücksetzen
+    fetch('/resetChannels', { method: 'POST' })
+      .then(() => {
+        const selectedFiles = uploadedFiles.filter(file => file.selected);
+        if (selectedFiles.length === 0) {
+          alert("Keine Dateien ausgewählt. Bitte markieren Sie die gewünschten Dateien.");
+          return;
+        }
+        document.getElementById('processingPopup2').style.display = 'block';
+        let channels = selectedFiles.map(file => ({ name: file.name, channel: file.channel }));
+        const formData = new FormData();
+        formData.append('channels', JSON.stringify(channels));
+        fetch('/processFiles', {
+          method: 'POST',
+          body: formData,
+        })
+        .then(response => {
+          if (!response.ok) throw new Error('Verarbeitung fehlgeschlagen');
+          return response.json();
+        })
+        .then(data => {
+            displayResults(data.results);
+            document.getElementById('processingPopup2').style.display = 'none';
+            processingComplete = true;
+          })
+          .catch(error => {
+            console.error('Fehler beim Senden der Dateien: ', error);
+            document.getElementById('processingPopup2').style.display = 'none';
+            alert('Verarbeitung fehlgeschlagen. Bitte erneut versuchen.');
+          });
       });
   }
   
@@ -393,5 +397,52 @@ window.onload = function () {
       .then(data => console.log('Wiedergabe gestartet:', data))
       .catch(error => console.error(error));
   }
-  
-  
+
+  function toggleFreqPopup() {
+    const popup = document.getElementById('freqPopup');
+    const msg = document.getElementById('freqPopupMsg');
+    if (popup.style.display === 'none' || popup.style.display === '') {
+      // Beim Öffnen aktuelle Frequenz laden
+      fetch('/getFrequency')
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById('freqInput').value = data.frequency ?? 100;
+          msg.textContent = '';
+        });
+      popup.style.display = 'block';
+    } else {
+      popup.style.display = 'none';
+      msg.textContent = '';
+    }
+  }
+
+  function saveFrequency() {
+    const freq = parseInt(document.getElementById('freqInput').value, 10);
+    const msg = document.getElementById('freqPopupMsg');
+    if (isNaN(freq) || freq < 1 || freq > 1000) {
+      msg.textContent = "Bitte eine gültige Frequenz (1-1000 Hz) eingeben.";
+      msg.style.color = "red";
+      return;
+    }
+    const payload = JSON.stringify({ frequency: freq });
+    console.log("Sende an /setFrequency:", payload); // Debug-Ausgabe
+    fetch('/setFrequency', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: payload
+    })
+      .then(res => {
+        if (res.ok) return res.text();
+        return res.text().then(text => { throw new Error(text); });
+      })
+      .then(() => {
+        msg.textContent = "Frequenz gespeichert!";
+        msg.style.color = "green";
+        setTimeout(toggleFreqPopup, 1000);
+      })
+      .catch(err => {
+        msg.textContent = err.message || "Fehler beim Speichern!";
+        msg.style.color = "red";
+      });
+  }
+

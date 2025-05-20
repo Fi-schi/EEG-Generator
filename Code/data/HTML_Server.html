@@ -31,6 +31,7 @@
     #resultTable th, #resultTable td { border: 1px solid #ccc; padding: 8px; text-align: left; }
     #resultTable th { background-color: #f2f2f2; }
     .channel-select { margin-left: 10px; }
+    #freqPopup { display: none; position: fixed; top: 25%; left: 50%; transform: translate(-50%, 0); background: white; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); padding: 20px; z-index: 1001; min-width: 260px; }
   </style>
 </head>
 <body>
@@ -48,6 +49,7 @@
         <input type="file" id="fileInput" accept=".txt" multiple>
         <button onclick="document.getElementById('fileInput').click()">Dateien auswählen und hochladen</button>
         <button id="infoButton" onclick="toggleInfoPopup()">Info</button>
+        <button id="freqButton" onclick="toggleFreqPopup()">Frequenz einstellen</button>
         <span id="storageInfo">Speicher: Lade...</span>
       </div>
       <div class="file-list">
@@ -75,6 +77,16 @@
           <li>Dateiendung sollte .txt sein.</li>
         </ul>
         <button onclick="toggleInfoPopup()">Schließen</button>
+      </div>
+      <div id="freqPopup">
+        <h2>Frequenz einstellen</h2>
+        <label for="freqInput">Frequenz (Hz):</label>
+        <input type="number" id="freqInput" min="1" max="1000" step="1" style="width:80px;">
+        <div style="margin-top:15px;">
+          <button onclick="saveFrequency()">Speichern</button>
+          <button onclick="toggleFreqPopup()">Abbrechen</button>
+        </div>
+        <div id="freqPopupMsg" style="color:green; margin-top:10px;"></div>
       </div>
     </div>
     <div id="devTab" class="tab-content">

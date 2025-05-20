@@ -1,19 +1,47 @@
 #include "Server.hpp"
+#include <WiFi.h>
+#include <esp_event.h>
+#include <esp_netif.h>
 
-void setupWiFi() {
-    WiFi.softAP(ssid, password);
-    Serial.println("WiFi gestartet");
-    Serial.print("IP-Adresse: ");
-    Serial.println(WiFi.softAPIP());
-  }
-  
-  void setupFileSystem() {
-    if (!SPIFFS.begin(true)) {
-      Serial.println("Fehler: SPIFFS konnte nicht gestartet werden!");
-      return;
+// --- HIER SSID UND PASSWORD DEFINIEREN ---
+const char* ssid = "EEG-Simulator"; // SSID des Hotspots
+const char* password = "12345678"; // Mindestens 8 Zeichen!
+
+int ausgabeFrequenzHz = 100; // Default
+
+void ladeFrequenzAusDatei() {
+    File f = SPIFFS.open("/freq.cfg", "r");
+    if (f) {
+        String val = f.readStringUntil('\n');
+        int hz = val.toInt();
+        if (hz >= 1 && hz <= 1000) ausgabeFrequenzHz = hz;
+        f.close();
     }
-    Serial.println("SPIFFS erfolgreich gestartet.");
-  }
+}
+
+void speichereFrequenzInDatei(int hz) {
+    File f = SPIFFS.open("/freq.cfg", "w");
+    if (f) {
+        f.println(hz);
+        f.close();
+    }
+}
+
+void setupRoutes(AsyncWebServer& server) {
+    server.on("/upload", HTTP_POST, [](AsyncWebServerRequest *request) {
+        request->send(200, "application/json", "{\"status\":\"uploading\"}");
+    },
+    [](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
+        if (!filename.endsWith(".txt")) return;
+
+        static File uploadFile;
+        if (index == 0) {
+            uploadFile = SPIFFS.open("/" + filename, "w");
+        }
+        if (uploadFile) uploadFile.write(data, len);
+        if (final && uploadFile) uploadFile.close();
+    });
+}
   
   std::vector<float> extractNumbersRegex(const String &content) {
     std::vector<float> numbers;
@@ -165,6 +193,9 @@ void setupWiFi() {
       }
   
       JsonArray channelsArray = doc.as<JsonArray>();
+      // Map zum Sammeln aller Zahlen pro Kanal in Reihenfolge
+      std::map<String, std::vector<float>> tempKanalDaten;
+  
       for (JsonObject elem : channelsArray) {
         const char* name = elem["name"];
         const char* channel = elem["channel"];
@@ -182,7 +213,12 @@ void setupWiFi() {
             file.close();
   
             std::vector<float> numbers = extractNumbersRegex(content);
-            kanalDaten[String(channel)] = numbers;
+  
+            // Werte anhängen, nicht überschreiben!
+            if (!numbers.empty()) {
+              auto& vec = tempKanalDaten[String(channel)];
+              vec.insert(vec.end(), numbers.begin(), numbers.end());
+            }
   
             if (content.length() == 0 || numbers.empty()) {
               res["selfCheck"] = "Keine Zahlen gefunden. Datei übersprungen.";
@@ -205,16 +241,62 @@ void setupWiFi() {
         }
       }
   
+      // Nach dem Durchlauf: tempKanalDaten in kanalDaten übernehmen
+      kanalDaten = std::move(tempKanalDaten);
+  
       String response;
       serializeJson(resultDoc, response);
       request->send(200, "application/json", response);
     });
     server.on("/play", HTTP_POST, [](AsyncWebServerRequest *request) {
-      abspielen();
+      startAbspielTask();
       request->send(200, "text/plain", "Wiedergabe gestartet");
     });
     server.serveStatic("/script.js", SPIFFS, "/script.js");
   
+    server.on("/resetChannels", HTTP_POST, [](AsyncWebServerRequest *request) {
+        kanalDaten.clear();
+        // Optional: weitere Arrays zurücksetzen, falls benötigt
+        // uploadedFiles.clear();
+        // activeUploads.clear();
+        request->send(200, "text/plain", "Kanaldaten zurückgesetzt");
+    });
+  
+    server.on("/getFrequency", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(200, "application/json", "{\"frequency\":" + String(ausgabeFrequenzHz) + "}");
+    });
+
+    server.on("/setFrequency", HTTP_POST, [](AsyncWebServerRequest *request){
+        // This handler is required but not used for body data
+    }, NULL, 
+    [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+        String body((char*)data, len);
+        if (body.length() == 0) {
+            request->send(400, "text/plain", "Kein JSON empfangen");
+            request->send(400, "text/plain", "Kein JSON empfangen");
+            return;
+        }
+        StaticJsonDocument<64> doc;
+        DeserializationError err = deserializeJson(doc, body);
+        if (err) {
+            request->send(400, "text/plain", "Ungültiges JSON: " + String(err.c_str()));
+            return;
+        }
+        if (!doc.containsKey("frequency")) {
+            request->send(400, "text/plain", "Feld 'frequency' fehlt");
+            return;
+        }
+        int freq = doc["frequency"];
+        if (freq >= 1 && freq <= 1000) {
+            ausgabeFrequenzHz = freq;
+            speichereFrequenzInDatei(freq);
+            request->send(200, "text/plain", "OK");
+        } else {
+            request->send(400, "text/plain", "Ungültige Frequenz");
+        }
+    }
+);
+
     server.begin();
     Serial.println("Webserver gestartet.");
   }
