@@ -50,11 +50,9 @@ void setupRoutes(AsyncWebServer& server) {
     auto numbersBegin = std::sregex_iterator(s.begin(), s.end(), floatRegex);
     auto numbersEnd = std::sregex_iterator();
     for (std::sregex_iterator i = numbersBegin; i != numbersEnd; ++i) {
-      std::smatch match = *i;
-      try {
-        float value = std::stof(match.str());
-        numbers.push_back(value);
-      } catch (...) {}
+  std::smatch match = *i;
+  float value = atof(match.str().c_str());
+  numbers.push_back(value);
     }
     return numbers;
   }
