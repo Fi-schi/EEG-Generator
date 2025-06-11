@@ -10,9 +10,9 @@ Zur Nachbearbeitung der DAC-Ausgabe wird ein Operationsverstärker als aktiver T
 
 Die Stromversorgung der Platine erfolgt über eine USB-Schnittstelle. Die Generierung und Ausgabe der Signale soll dabei in Echtzeit erfolgen.
 
-\section{Platine}
+\chapter{Platine}
 
-\subsection{Komponentenübersichet}
+\section{Komponentenübersichet}
 
 Die wichtigsten Komponenten der Platine sind:
 
@@ -39,8 +39,8 @@ Die analoge Nachbearbeitung der Signale erfolgt durch einen Operationsverstärke
 
 Zur Erzeugung der notwendigen Versorgungsspannungen kommen ein LDO für 5V, ein 3.3V LDO, sowie ein invertierter DCDC Wandler zum Einsatz. Diese sind notwendig, um eine symmetrische Versorgung von \pm 5V für den DAC Operationsverstärker bereitzustellen.
 
-\subsection{Schaltungsdesign}
-\subsubsection{Gesamtüberblick}
+\section{Schaltungsdesign}
+\subsection{Gesamtüberblick}
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{bilder/Platine_gesamt.png}
@@ -56,7 +56,7 @@ Die Platine ist in mehrere Funktionsblöcke unterteilt, die jeweils für spezifi
     \item \textbf{USB-Block:} Dient der Stromversorgung der Platine über eine USB-Schnittstelle.
 \end{itemize}
 
-\subsubsection{Mikrocontroller-Block}
+\subsection{Mikrocontroller-Block}
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{bilder/Mikrocontroller_Block.png}
@@ -67,7 +67,7 @@ Die Platine ist in mehrere Funktionsblöcke unterteilt, die jeweils für spezifi
 Der Mikrocontroller-Block enthält den ESP32-S3 16R8, der die zentrale Steuereinheit der Platine darstellt. Er ist für die Signalverarbeitung, die Bereitstellung der Weboberfläche und Speicherung der EEG-Simulationsdaten verantwortlich. Der Mikrocontroller kommuniziert über eine parallele Schnittstelle mit dem \gls{dac} und steuert dessen Ausgänge.\\
 Die Programmierung des Mikrocontrollers erfolgt in C++ unter Verwendung der Arduino-IDE mit PlatformIO. 
 
-\subsubsection{DAC-Block}
+\subsection{DAC-Block}
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{bilder/DAC.png}
@@ -79,7 +79,7 @@ Der DAC-Block enthält den DAC8412FPZ mit seiner speziellen Beschaltung.
 Der \gls{dac} wandelt die digitalen Signale des Mikrocontrollers in analoge Signale umwandelt. Hierbei werden die Signal mit einer Parallelen-Schnittstelle übertragen, die es durch gleichzeitiges bereitstellen der einzelnen Digitalen Bits, ermöglichst eine hohe Datenrate bereitzustellen. Der DAC8412FPZ bietet eine Auflösung von 12 Bit und vier unabhängige Ausgänge, die jeweils für die Ausgabe eines EEG-Signals verwendet werden können.\\
 Die Signale werden vom Mikrocontroller bereitgestellt und über die parallele Schnittstelle an den DAC übertragen. Der DAC wandelt diese Signale in analoge Spannungen um, die dann weiterverarbeitet werden.\\
 
-\subsubsection{Operationsverstärker-Block}
+\subsection{Operationsverstärker-Block}
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{bilder/Operationsverstaerker_Block.png}
@@ -90,7 +90,7 @@ Die Signale werden vom Mikrocontroller bereitgestellt und über die parallele Sc
 Der Operationsverstärker-Block enthält den TL071CDR, der als aktiver Tiefpassfilter fungiert. Dieser glättet die analogen Signale des \gls{dac} und reduziert hochfrequentes Rauschen. Der Operationsverstärker ist so konfiguriert, dass er eine Verstärkung von 1 bietet, um die Ausgangsspannungen im Millivolt-Bereich zu halten.\\
 Im weiter inst noch möglich einen weiterer Operationsverstärker zu verbauen der als Spannungsfolger fungieren kann, um die Ausgangsimpedanz zu reduzieren und die Signalqualität zu verbessern. Standardmäßig ist dieser nicht verbaut und mit einem Jumper überbrückt. 
 
-\subsubsection{Spannungsversorgung}
+\subsection{Spannungsversorgung}
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{bilder/Bipolar_Power.png}
@@ -103,7 +103,7 @@ Für die Versorgung des Mikrocontrollers ist der TLV75733PDRVR zuständig, der e
 Da der \gls{dac} DAC8412FPZ eine symmetrische Versorgungsspannung von \pm 5V benötigt, wird ein invertierter DCDC Wandler LT3580EDD verwendet, der aus der 5V Versorgungsspannung eine negative Spannung von -5V erzeugt. Die wird zusätzlich auch für die Versorgung der Operationsverstärker genutzt.\\
 Da der \gls{dac} eine Referenzspannung benötigt, wird eine stabile \pm 1.25V Referenzspannung durch zwei TS4061AILT-1.25 bereitgestellt. 
 
-\subsubsection{USB-Block}
+\subsection{USB-Block}
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{bilder/USBC_Port.png}

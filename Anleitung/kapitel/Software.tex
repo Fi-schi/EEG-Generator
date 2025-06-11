@@ -1,0 +1,30 @@
+\chapter{Software}
+
+Die Software ist in 2 Abschnitte Aufgeteilt, einmal in den Webserver mit Webinterface und die Datenverarbeitung mit \gls{dac} Steuerung.
+
+\section{Webserver mit Webinterface}
+
+Der Webserver ist ein Asynchroner TCP Webserver???????????????????????????\\
+
+Das Webinterface ist mit HTML und javascript geschrieben.
+Dies ermöglicht ein einfaches aber auch modernes Designe zu erzeugen und dieses auf einem Mikrocontroller laufen zulassen.
+Das Webinterface bietet die Möglichkeiten .txt Dateien auf den Mikrocontroller hochzuladen und abzuspeichern.
+Diese werden dann in einer Liste angezeigt und stellen darin auch die "Abspiel" Reihenfolge dar.
+Diese Reihenfolge kann mittels Verschieben $\left(Drag \ and \ Drop \right)$ geändert werden.
+
+Um die Einzelen Dateien den Ausgangskanälen des \gls{dac} zuzuordnen ist es möglich am rechten Ende Des Dateifeldes den Kanal in einem Menü auszuwählen.
+Wenn nun auf der linken Seite des Dateifeldes die Datei noch ausgewählt wird kann man die Verarbeitung der Dateien starten.
+Hierfür muss der unter Button "Verarbeitung Anstoßen" betätigt werden.
+Dieser führt eine Funktion aus, die die Reihenfolge der ausgewählten Dateien einließt und deren Inhalt auf das nötige Format überprüft.
+Dabei werden alles Zahlen aus den Dateien heraus genommen und in der Reihenfolge innerhalb der Date und dann in der Dateireihenfolge in das dem Kanal zugehörigem Array geschrieben.
+
+Wenn dies nun Abgeschlossen ist, kann der Button "Abspielen" betätigt werden.
+Daraufhin werden die Zahlen in den Arrays an den \gls{dac} weitergegeben.
+Hierfür wird jede Zahl in den passenden Wert für den Wertebereich des \gls{dac} umgewandelt. 
+Dieser hat mit 12 Bit einen Wandlungsbereich von 0 bis 4095.
+Da der gls{dac} Bipolar betrieben wird, liegen nun die negativen Zahlen im Bereich von 0 bis 2047 und die positiven Zahlen von 2048 bis 4095.
+Wenn nun die Zahl umgewandelt wurde wird diese nun in eine 8 Bit umgewandelt und jeder einzelne Bit wird nun durch einen GPIO-Port repräsentiert.
+Dadurch lässt sich mit nur einem einzelen Takt der Zustand der DAC-Eingänge und damit die komplette Zahl einlesen und übergeben.
+Nach einlesen der Zahl im \gls{dac} wird diese nun Umgewandelt und als analoger Wert ausgegeben.
+
+Darauf hin wird sofort eine neue Zahl dem \gls{dac} übergeben um eine vorher eingestellt Frequenz darzustellen.
