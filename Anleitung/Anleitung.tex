@@ -18,6 +18,7 @@
 \usepackage{subcaption}          % mehrere Bilder in einem Bild
 \usepackage{pgfplots}            % Grafiken erzeugen
 \usepackage{smartdiagram}        % schnelle und einfache Grafiken
+\usepackage{comment}
 \usetikzlibrary{positioning}     % bessere Ortsbezeichnung
 \usetikzlibrary{shapes}          % typische Formen wie Rechtecke, Ellipsen usw. einfach zeichnen
 \usetikzlibrary{intersections}   % Schnittpunkt von Geraden adressieren
@@ -43,7 +44,7 @@
 \bcity{Wismar}
 \supervisor{Prof.~Dr.~Simanski}
 %\secsupervisor{}
-\keywords{Logik, Mathematik}
+\keywords{Logik, EEG}
 
 % Metadaten in die PDF-Datei schreiben
 \makepdfmetadata
@@ -101,9 +102,15 @@
 
 % Abstract
 \makeabstract{
-  Maximal eine halbe Seite.
+
+Im Rahmen des Projektseminars wurde eine Demonstrationsplatine zur Erzeugung synthetischer EEG-Signale entwickelt. Ziel war es, ein kompaktes und intuitiv bedienbares System zu realisieren, das insbesondere im naturwissenschaftlich-technischen Unterricht zum Einsatz kommen kann. Die Signalverarbeitung übernimmt ein ESP32-S3 Mikrocontroller, der über eine parallele Schnittstelle einen hochauflösenden DAC (DAC8412FPZ) ansteuert. Die vier analogen Ausgangskanäle ermöglichen die gleichzeitige Ausgabe mehrerer Signalverläufe.
+Die Konfiguration der Signale erfolgt benutzerfreundlich über eine integrierte Weboberfläche, die ohne zusätzliche Softwareinstallation über WLAN erreichbar ist. Der Aufbau der Schaltung wurde so gewählt, dass die Signale durch Tiefpassfilter geglättet und über Spannungsteiler optional auf den Mikrovoltbereich skaliert werden können. Während der Erprobung zeigte sich, dass sich die Ausgabequalität durch den Einsatz zusätzlicher Filter- oder Versorgungskomponenten weiter optimieren lässt.
+Die entwickelte Platine bietet eine solide Basis für didaktische Zwecke sowie eine flexible Plattform für zukünftige Erweiterungen, etwa zur Visualisierung der DAC-Ausgabe im Browser oder zur Einbindung von Signalbibliotheken.
+
 }{
-  English Version.
+In the context of a project seminar, a demonstration printed circuit board (PCB) was developed for the purpose of generating synthetic electroencephalograms (EEGs). The objective of the project was to design a compact and user-friendly system suitable for use in science and engineering education. The generation of signals is facilitated by an ESP32-S3 microcontroller, which governs a high-resolution DAC (DAC8412FPZ) through a parallel interface. It is evident that the four analog output channels facilitate the simultaneous playback of multiple signal patterns.
+The configuration of the signal is managed through a built-in web interface that is accessible via Wi-Fi and does not require the installation of additional software. The circuit design incorporates low-pass filters for signal smoothing and optional voltage dividers for scaling to microvolt levels. As the testing process unfolded, it became evident that the quality of output could be further enhanced through the implementation of advanced filtration techniques and optimisation of the power supply.
+The developed system provides a robust foundation for educational applications and a flexible platform for future expansions, such as browser-based signal visualization or the integration of predefined signal libraries.
 }
 
 % Inhaltsverzeichnis (Schalter `compact' sorgt für einfachen Zeilenabstand)
@@ -119,6 +126,7 @@
 % weitere Kapitel hier jeweils einzeln einbinden
 \input{kapitel/Platine.tex}
 \input{kapitel/Software.tex}
+\input{kapitel/Bedienungsanleitung.tex}
 % Schluss
 \input{kapitel/schluss}
 
@@ -144,27 +152,17 @@
 
 % Abbildungsverzeichnis einfügen
 \listoffigures
-
-% Tabellenverzeichnis einfügen
-\listoftables
-
-% Algorithmenverzeichnis einfügen
-\listofalgorithms
-
-% % Quelltextverzeichnis einfügen
-\listoflistings
-
 % Abkürzungsverzeichnis
-\listofacronyms
+%\listofacronyms
 
 % Symbolverzeichnis
-\listofsymbols
+%\listofsymbols
 
 % falls ein anderer Glossar-Stil genutzt wird und die zweite Spalte zu schmal ist:
 % \setlength{\glsdescwidth}{0.8\linewidth}
 
 % Glossar einfügen
-\printglossary
+%\printglossary
 
 % Index einfügen
 \printindex

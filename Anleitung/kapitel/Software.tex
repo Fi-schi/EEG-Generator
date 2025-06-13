@@ -1,30 +1,62 @@
 \chapter{Software}
 
-Die Software ist in 2 Abschnitte Aufgeteilt, einmal in den Webserver mit Webinterface und die Datenverarbeitung mit \gls{dac} Steuerung.
+Die Software des Systems gliedert sich in zwei Hauptkomponenten: das Webinterface mit zugehörigem Webserver sowie die Verarbeitungseinheit zur Steuerung des \gls{dac}.
+In diesem Kapitel wird der Aufbau beider Softwareteile erläutert. Die konkrete Bedienung der Benutzeroberfläche und Abläufe aus Anwendersicht werden im Anschlusskapitel \textit{Bedienung} beschrieben.
 
-\section{Webserver mit Webinterface}
+\section{Frontend: Webinterface}
 
-Der Webserver ist ein Asynchroner TCP Webserver???????????????????????????\\
+Das Frontend ist eine lokal vom Mikrocontroller bereitgestellte Weboberfläche zur Steuerung und Überwachung des Systems. Die grafische Benutzeroberfläche wurde mit HTML, CSS und JavaScript umgesetzt und als sogenannte Single Page Application (SPA) realisiert. Ziel war eine moderne, intuitive und plattformunabhängige Steuerung über das Netzwerk.
 
-Das Webinterface ist mit HTML und javascript geschrieben.
-Dies ermöglicht ein einfaches aber auch modernes Designe zu erzeugen und dieses auf einem Mikrocontroller laufen zulassen.
-Das Webinterface bietet die Möglichkeiten .txt Dateien auf den Mikrocontroller hochzuladen und abzuspeichern.
-Diese werden dann in einer Liste angezeigt und stellen darin auch die "Abspiel" Reihenfolge dar.
-Diese Reihenfolge kann mittels Verschieben $\left(Drag \ and \ Drop \right)$ geändert werden.
+\subsection{Struktur}
+Die Weboberfläche besteht aus folgenden Komponenten:
 
-Um die Einzelen Dateien den Ausgangskanälen des \gls{dac} zuzuordnen ist es möglich am rechten Ende Des Dateifeldes den Kanal in einem Menü auszuwählen.
-Wenn nun auf der linken Seite des Dateifeldes die Datei noch ausgewählt wird kann man die Verarbeitung der Dateien starten.
-Hierfür muss der unter Button "Verarbeitung Anstoßen" betätigt werden.
-Dieser führt eine Funktion aus, die die Reihenfolge der ausgewählten Dateien einließt und deren Inhalt auf das nötige Format überprüft.
-Dabei werden alles Zahlen aus den Dateien heraus genommen und in der Reihenfolge innerhalb der Date und dann in der Dateireihenfolge in das dem Kanal zugehörigem Array geschrieben.
+\begin{itemize}
+\item Einem Kopfbereich mit Logo und Titel
+\item Einer Tab-Navigation zur Auswahl verschiedener Funktionsbereiche
+\item Inhaltsbereiche für Datei-Uploads, Dateiverwaltung und Statusanzeigen
+\item Upload-Felder zur Übertragung von Dateien an den Mikrocontroller
+\item Fortschrittsanzeigen für laufende Dateiübertragungen
+\item Menüs zur Kanalzuweisung von Dateien
+\end{itemize}
 
-Wenn dies nun Abgeschlossen ist, kann der Button "Abspielen" betätigt werden.
-Daraufhin werden die Zahlen in den Arrays an den \gls{dac} weitergegeben.
-Hierfür wird jede Zahl in den passenden Wert für den Wertebereich des \gls{dac} umgewandelt. 
-Dieser hat mit 12 Bit einen Wandlungsbereich von 0 bis 4095.
-Da der gls{dac} Bipolar betrieben wird, liegen nun die negativen Zahlen im Bereich von 0 bis 2047 und die positiven Zahlen von 2048 bis 4095.
-Wenn nun die Zahl umgewandelt wurde wird diese nun in eine 8 Bit umgewandelt und jeder einzelne Bit wird nun durch einen GPIO-Port repräsentiert.
-Dadurch lässt sich mit nur einem einzelen Takt der Zustand der DAC-Eingänge und damit die komplette Zahl einlesen und übergeben.
-Nach einlesen der Zahl im \gls{dac} wird diese nun Umgewandelt und als analoger Wert ausgegeben.
+\subsection{Funktion}
+Das JavaScript im Frontend übernimmt folgende Aufgaben:
 
-Darauf hin wird sofort eine neue Zahl dem \gls{dac} übergeben um eine vorher eingestellt Frequenz darzustellen.
+\begin{itemize}
+\item Initialisierung und Abfrage von Systemstatus (z.,B. Speicherplatz, Dateiliste)
+\item Regelmäßige Aktualisierung des Speicherstatus (alle 5 Sekunden)
+\item Hochladen von Dateien per Datei-Dialog oder Drag-and-Drop
+\item Anzeige des Uploadfortschritts für jede Datei
+\item Interaktive Zuordnung von Dateien zu \gls{dac}-Kanälen
+\end{itemize}
+
+Die gesamte Kommunikation mit dem ESP32 erfolgt asynchron per HTTP.
+
+\section{Backend: Mikrocontroller-Firmware}
+
+Das Backend ist als Firmware auf einem ESP32-S3 Mikrocontroller umgesetzt. Es wurde in C++ mit PlatformIO entwickelt und ist modular aufgebaut. Die Firmware übernimmt sowohl die Netzwerkschnittstelle (Webserver), die Dateiverwaltung als auch die Steuerung der Hardware.
+
+\subsection{Systemaufbau}
+Die Firmware gliedert sich in folgende Hauptbestandteile:
+
+\begin{itemize}
+\item \texttt{main.cpp}: Initialisierung von WLAN, Dateisystem (SPIFFS) und Webserver
+\item \texttt{Server.cpp}: Bereitstellung der HTTP-Routen für Datei-Uploads und Speicherfunktionen
+\item \texttt{Spannungswandlung.cpp}: Verarbeitung und Umwandlung der digitalen Werte für den \gls{dac}
+\item \texttt{PinMapping.cpp}: Zuordnung der Funktionen zu den verwendeten GPIO-Pins
+\end{itemize}
+
+\subsection{Webserverfunktionen}
+Der Webserver basiert auf der Bibliothek \texttt{ESPAsyncWebServer} und bietet:
+
+\begin{itemize}
+\item Bereitstellung der HTML-/JS-Dateien aus dem SPIFFS-Dateisystem
+\item Empfang und Speicherung hochgeladener Dateien
+\item Auslesen des freien Speicherplatzes
+\item Steuerung von GPIOs und Ausgabe an den \gls{dac}
+\end{itemize}
+
+\subsection{Datenverarbeitung und DAC-Steuerung}
+Sobald der Benutzer im Webinterface den Befehl zur Verarbeitung auslöst, wird der Inhalt der ausgewählten Textdateien in strukturierter Reihenfolge verarbeitet. Die Zahlenwerte in den Dateien werden extrahiert und in Kanal-spezifischen Arrays abgelegt. Dabei erfolgt eine Skalierung auf den 12-Bit-Wertebereich (0 bis 4095) des \gls{dac}, wobei negative Werte (im bipolaren Modus) auf 0 bis 2047, positive auf 2048 bis 4095 abgebildet werden.
+
+Die Umwandlung erfolgt bitweise: Jeder Wert wird in ein 8-Bit-Muster übersetzt, das über entsprechende GPIO-Pins an den \gls{dac} übermittelt wird. Eine Taktsynchronisation stellt sicher, dass jeder Wert korrekt übergeben und konvertiert wird. Die Ausgabe erfolgt mit fester Frequenz, um eine gleichmäßige Signalform zu erzeugen.

@@ -1,4 +1,25 @@
 \chapter{Zusammenfassung und Ausblick}
 \label{schluss}
 
-Rückblick, Bewertung, Ausblick über mögliches Fortführen der Arbeit
+\section{Zusammenfassung}
+
+Im Rahmen dieses Projekts wurde eine funktionsfähige Demonstrationsplatine zur Erzeugung synthetischer EEG-Signale entwickelt. Ziel war es, ein intuitiv bedienbares und technisch robustes Gerät für den Einsatz im Unterricht bereitzustellen. 
+
+Die entwickelte Schaltung basiert auf einem ESP32-S3 Mikrocontroller in Kombination mit einem hochauflösenden DAC (DAC8412FPZ). Über vier unabhängige Ausgänge können benutzerdefinierte Signale analog ausgegeben und über Operationsverstärker geglättet werden. Die Parametrierung erfolgt über eine browserbasierte Weboberfläche, die vollständig ohne zusätzliche Softwareinstallation auskommt.
+
+Während der Testphase zeigten sich einige Einschränkungen: Die vom invertierenden DC/DC-Wandler erzeugte negative Versorgungsspannung enthielt ein störendes hochfrequentes Signal. Dieses lässt sich jedoch durch einen nachgeschalteten Low-Dropout-Regler (LDO) wirksam unterdrücken. Alternativ wurde erfolgreich eine Versorgung über zwei symmetrisch verschaltete Lithium-Akkus getestet, wodurch die Störungen vollständig vermieden wurden.
+
+Die Signalqualität im Mikrovoltbereich war zunächst stark von Rauschanteilen überlagert. Mittels spektraler Analyse (FFT) konnte das Nutzsignal jedoch nachgewiesen werden. Durch das Überbrücken des Spannungsteilers mittels 0-Ohm-Jumpern lässt sich das Signal alternativ auch im Millivoltbereich nutzen, was eine deutlich einfachere Auswertung per Oszilloskop ermöglicht.
+
+\section{Ausblick}
+
+Die derzeitige Version erfüllt alle grundlegenden Anforderungen an eine signalgebende EEG-Demoplatine. Dennoch ergeben sich mehrere sinnvolle Erweiterungs- und Optimierungsmöglichkeiten:
+
+\begin{itemize}
+  \item \textbf{Verbesserung der Filterung:} Der Einsatz eines höherwertigen analogen Tiefpassfilters (z.\,B. zweiter Ordnung oder Sallen-Key-Topologie) könnte die Rauschunterdrückung weiter verbessern. Dies muss jedoch experimentell verifiziert werden.
+  \item \textbf{Stromversorgung:} Eine saubere Glättung der bipolare Versorgung über LDOs oder Versorgung mittels Akkus wäre langfristig stabiler als ein DC/DC-Wandler.
+  \item \textbf{Signalbibliothek:} Eine optionale, nicht im Projekt enthaltene Sammlung vordefinierter Signalformen (z.,B. Alpha- oder Betawellen) könnte zukünftig über die Weboberfläche eingebunden werden.
+  \item \textbf{Live-Visualisierung:} Eine grafische Darstellung der aktuellen DAC-Ausgabe direkt auf der Weboberfläche würde die Bedienung deutlich intuitiver gestalten. Dadurch könnten Nutzerinnen und Nutzer die Signalform in Echtzeit mitverfolgen, ohne auf externe Messgeräte wie ein Oszilloskop angewiesen zu sein.
+\end{itemize}
+
+Insgesamt bietet die entwickelte Platine eine solide Grundlage für den universitären Einsatz und stellt eine flexible Plattform für weitere didaktische und technische Weiterentwicklungen dar.

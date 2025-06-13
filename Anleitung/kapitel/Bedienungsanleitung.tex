@@ -1,0 +1,41 @@
+\chapter{Bedienung}
+\label{chap:bedienung}
+
+Die Bedienung der EEG-Demonstrationsplatine erfolgt vollständig über eine browserbasierte Weboberfläche, die vom Mikrocontroller bereitgestellt wird. Es ist keine zusätzliche Softwareinstallation notwendig – ein aktueller Webbrowser genügt. Im Folgenden wird der typische Bedienablauf Schritt für Schritt beschrieben.
+
+\section{Verbindung zur Platine}
+
+Nach dem Einschalten der Platine erzeugt der ESP32-S3 einen eigenen WLAN-Hotspot mit dem Netzwerknamen \textit{EEG-Simulator} und dem Netzwerkpasswort \textit{123456789}.
+Nutzerinnen und Nutzer verbinden sich mit diesem WLAN, das keine Internetverbindung benötigt. Anschließend kann die Weboberfläche über die IP-Adresse \texttt{192.168.4.1} im Browser geöffnet werden.
+
+\section{Weboberfläche}
+
+Die Weboberfläche ist in mehrere Bereiche unterteilt:
+
+\begin{itemize}
+  \item \textbf{Dateiupload:} Ermöglicht das Hochladen von .txt-Dateien, die Zahlenwerte zur DAC-Ausgabe enthalten. Der Upload erfolgt per Drag-and-Drop oder über einen Dateiauswahldialog.
+  \item \textbf{Dateiverwaltung:} Zeigt eine Liste aller hochgeladenen Dateien an. Die Reihenfolge kann per Drag-and-Drop verändert werden und bestimmt die spätere Abspielreihenfolge.
+  \item \textbf{Kanalauswahl:} Jeder Datei kann ein DAC-Ausgangskanal zugewiesen werden (A bis D). Die Zuordnung erfolgt über ein Auswahlmenü neben dem Dateinamen.
+  \item \textbf{Signalverarbeitung:} Durch Auswahl und anschließenden Klick auf den Button \textit{„Verarbeitung anstoßen“} wird der Inhalt der gewählten Dateien eingelesen, auf korrekte Struktur überprüft und für die DAC-Ausgabe vorbereitet.
+  \item \textbf{Signalwiedergabe:} Der Button \textit{„Abspielen“} startet die Ausgabe der Signale über die vier DAC-Kanäle. Die Daten werden dabei taktgenau an den DAC übertragen und in analoge Spannungen gewandelt.
+\end{itemize}
+
+\section{Ablauf der Signalerzeugung}
+
+Nach dem Hochladen und der Auswahl der relevanten Dateien läuft die Erzeugung der EEG-Signale wie folgt ab:
+
+\begin{enumerate}
+  \item Die enthaltenen Zahlenwerte werden aus den Textdateien extrahiert.
+  \item Negative und positive Werte werden auf den 12-Bit-Wertebereich des DACs abgebildet (0–2047 für negativ, 2048–4095 für positiv).
+  \item Die konvertierten Werte werden kanalweise in interne Speicherarrays geladen.
+  \item Die Ausgabefrequenz bestimmt das zeitliche Intervall zwischen den DAC-Werten.
+  \item Bei Klick auf \textit{„Abspielen“} beginnt die kontinuierliche, synchrone Ausgabe.
+\end{enumerate}
+
+\section{Hinweise zur Verwendung}
+
+\begin{itemize}
+  \item Nach Änderungen an der Dateireihenfolge oder Kanalauswahl muss die Verarbeitung erneut angestoßen werden.
+  \item Eine stabile Stromversorgung über USB-C ist für die gleichmäßige Ausgabe unerlässlich.
+  \item Die Signale können mit einem Oszilloskop am Ausgang überwacht werden.
+\end{itemize}
