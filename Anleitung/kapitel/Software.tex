@@ -60,3 +60,4 @@ Der Webserver basiert auf der Bibliothek \texttt{ESPAsyncWebServer} und bietet:
 Sobald der Benutzer im Webinterface den Befehl zur Verarbeitung auslöst, wird der Inhalt der ausgewählten Textdateien in strukturierter Reihenfolge verarbeitet. Die Zahlenwerte in den Dateien werden extrahiert und in Kanal-spezifischen Arrays abgelegt. Dabei erfolgt eine Skalierung auf den 12-Bit-Wertebereich (0 bis 4095) des \gls{dac}, wobei negative Werte (im bipolaren Modus) auf 0 bis 2047, positive auf 2048 bis 4095 abgebildet werden.
 
 Die Umwandlung erfolgt bitweise: Jeder Wert wird in ein 8-Bit-Muster übersetzt, das über entsprechende GPIO-Pins an den \gls{dac} übermittelt wird. Eine Taktsynchronisation stellt sicher, dass jeder Wert korrekt übergeben und konvertiert wird. Die Ausgabe erfolgt mit fester Frequenz, um eine gleichmäßige Signalform zu erzeugen.
+

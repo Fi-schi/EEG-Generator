@@ -34,6 +34,7 @@ Zur Nachbearbeitung der DAC-Ausgabe wird ein aktiver Tiefpassfilter auf Basis de
 
 Die Spannungsversorgung der Komponenten wird durch mehrere Regler bereitgestellt: Ein Linearregler (LDO) liefert 5\,V für den DAC und nachgeschaltete Stufen, ein weiterer LDO stellt 3{,}3\,V für den Mikrocontroller bereit. Zusätzlich erzeugt ein invertierender DC/DC-Wandler die negative Versorgungsspannung, sodass der DAC und die Operationsverstärker symmetrisch mit \(\pm5\,\text{V}\) betrieben werden können.
 
+\clearpage
 
 \section{Schaltungsdesign}
 \subsection{Gesamtüberblick}
@@ -132,3 +133,11 @@ Der Mikrocontroller (ESP32-S3) befindet sich im oberen Bereich der Platine und k
 Die vier analogen Ausgangskanäle befinden sich im unteren Bereich der Platine. Jeder Kanal verfügt über eine eigene Tiefpassfilterstufe sowie individuell geführte Ausgänge, die über identisch dimensionierte Leitungen auf korrekte Impedanz und Symmetrie geachtet wurden.
 Die Versorgungsspannungen verlaufen sternförmig von der zentralen Spannungsaufbereitung aus, wobei Filterkondensatoren lokal an jedem Block platziert sind. Besonders im Bereich der symmetrischen Versorgung (±5\,V) und der Referenzspannungen wurde auf kurze Wege, Masseführung und Potentialtrennung geachtet.
 Zudem wurde eine definierte „Keep-Out-Zone“ um die Antenne des ESP32 ausgewiesen, um Störungen im WLAN-Bereich zu vermeiden.
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{bilder/Platine_bestueckt.png}
+    \caption{Bestückte Platine}
+    \label{fig:platine_bestueckt}
+\end{figure}
