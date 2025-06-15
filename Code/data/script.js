@@ -65,7 +65,7 @@ window.onload = function () {
   
   let uploadedFiles = [];
   let isPlaying = false;
-  const excludedFiles = ["HS-Wismar_Logo-FIW_V1_RGB.png","script.js", "HTML_Server.html"];
+  const excludedFiles = ["HS-Wismar_Logo-FIW_V1_RGB.png","script.js", "HTML_Server.html","freq.cfg"];
 
     
   

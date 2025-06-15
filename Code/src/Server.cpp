@@ -3,10 +3,6 @@
 #include <esp_event.h>
 #include <esp_netif.h>
 
-// --- HIER SSID UND PASSWORD DEFINIEREN ---
-const char* ssid = "EEG-Simulator"; // SSID des Hotspots
-const char* password = "12345678"; // Mindestens 8 Zeichen!
-
 int ausgabeFrequenzHz = 100; // Default
 
 void ladeFrequenzAusDatei() {
