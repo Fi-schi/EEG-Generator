@@ -10,11 +10,11 @@
 #define DB0         40
 #define DB1         39
 #define DB2         38
-#define DB3         37
-#define DB4         36
-#define DB5         35
-#define DB6         48
-#define DB7         47
+#define DB3         15    //37
+#define DB4         16    //36
+#define DB5         17    //35
+#define DB6         18   //48
+#define DB7          8   //47
 #define DB8         21
 #define DB9         14
 #define DB10        13

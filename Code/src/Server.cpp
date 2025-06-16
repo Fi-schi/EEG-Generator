@@ -42,7 +42,7 @@ void setupRoutes(AsyncWebServer& server) {
   std::vector<float> extractNumbersRegex(const String &content) {
     std::vector<float> numbers;
     std::string s = content.c_str();
-    std::regex floatRegex("\\b-?[0-9]+(?:\\.[0-9]+)?\\b");
+    std::regex floatRegex("-?[0-9]+(?:\\.[0-9]+)?");
     auto numbersBegin = std::sregex_iterator(s.begin(), s.end(), floatRegex);
     auto numbersEnd = std::sregex_iterator();
     for (std::sregex_iterator i = numbersBegin; i != numbersEnd; ++i) {
@@ -242,10 +242,17 @@ void setupRoutes(AsyncWebServer& server) {
       serializeJson(resultDoc, response);
       request->send(200, "application/json", response);
     });
+
     server.on("/play", HTTP_POST, [](AsyncWebServerRequest *request) {
-      startAbspielTask();
-      request->send(200, "text/plain", "Wiedergabe gestartet");
-    });
+    if (kanalDaten.empty()) {
+        request->send(400, "text/plain", "❌ Keine Kanaldaten geladen. Bitte zuerst Datei hochladen und /processFiles aufrufen.");
+        return;
+    }
+    startAbspielTask();
+    request->send(200, "text/plain", "Wiedergabe gestartet");
+});
+
+
     server.serveStatic("/script.js", SPIFFS, "/script.js");
   
     server.on("/resetChannels", HTTP_POST, [](AsyncWebServerRequest *request) {

@@ -4,6 +4,7 @@
 #include <Arduino.h>
 
 void ausgabe(char Channel, uint16_t Data) {
+    //Serial.printf("Ausgabe auf Kanal %c: %u\n", Channel, Data);
     Data &= 0x0FFF; // Nur untere 12 Bit zulassen
   
     digitalWrite(R_W, LOW);        // Schreiben aktivieren
@@ -17,12 +18,12 @@ void ausgabe(char Channel, uint16_t Data) {
             digitalWrite(ADD1, LOW);    // A1
             break;
         case 'B':
-            digitalWrite(ADD0, LOW);    // A0
-            digitalWrite(ADD1, HIGH);     // A1
-            break;
-        case 'C':
             digitalWrite(ADD0, HIGH);    // A0
             digitalWrite(ADD1, LOW);     // A1
+            break;
+        case 'C':
+            digitalWrite(ADD0, LOW);    // A0
+            digitalWrite(ADD1, HIGH);     // A1
             break;
         case 'D':
             digitalWrite(ADD0, HIGH);     // A0
@@ -56,7 +57,7 @@ void ausgabe(char Channel, uint16_t Data) {
     // Daten übernehmen (Load)
   
     //delayMicroseconds(1);        // tLDW ≥ 170 ns laut Datenblatt
-   // digitalWrite(Load_Data, HIGH); // LDAC deaktivieren
+    //digitalWrite(Load_Data, LOW); // LDAC deaktivieren
   
     // Schreiben beenden
    // digitalWrite(R_W, HIGH);       // Schreiben beenden (nicht zwingend nötig, aber klar)
@@ -68,44 +69,81 @@ void ausgabe(char Channel, uint16_t Data) {
 TaskHandle_t abspielTaskHandle = nullptr;
 extern int ausgabeFrequenzHz;
 
-// Task-Funktion
 void abspielTask(void* parameter) {
     Serial.println("Starte Abspielen der Daten (FreeRTOS Task)...");
-    constexpr float minEEG = -100.0f; // mV
-    constexpr float maxEEG = 100.0f;  // mV
+
+    // Hier definieren wir die Min- und Max-Werte für das EEG-Signal (in mV)
+    float minEEG = -100.0f; // mV (Minimum des EEG-Signals)
+    float maxEEG = 100.0f;  // mV (Maximum des EEG-Signals)
 
     // Maximale Länge aller Kanäle bestimmen
     size_t maxLength = 0;
+    if (kanalDaten.empty()) {
+        Serial.println("⚠️ Keine Kanal-Daten geladen. Task wird abgebrochen.");
+        abspielTaskHandle = nullptr;
+        vTaskDelete(nullptr);
+        return;
+    }
+
+    // Bestimmung der maximalen Datenlänge über alle Kanäle hinweg
     for (const auto& [_, data] : kanalDaten) {
         if (data.size() > maxLength) {
             maxLength = data.size();
         }
     }
 
+    Serial.printf("Maximale Länge aller Kanäle: %zu\n", maxLength);
+    if (maxLength == 0) {
+        Serial.println("⚠️ Kanäle vorhanden, aber alle leer. Task wird beendet.");
+        abspielTaskHandle = nullptr;
+        vTaskDelete(nullptr);
+        return;
+    }
+
+    // Abspielen der Daten in einer Schleife
     for (size_t i = 0; i < maxLength; ++i) {
         for (const auto& [channel, data] : kanalDaten) {
+            // Werte aus den geladenen Daten holen (mV)
             float value = (i < data.size()) ? data[i] : 0.0f;
-            float normalized = (value - minEEG) / (maxEEG - minEEG);
-            normalized = constrain(normalized, 0.0f, 1.0f);
-            uint8_t intValue = static_cast<uint8_t>(normalized * 255.0f);
 
+            // Skalierung der Werte von -100 mV bis +100 mV auf den DAC-Bereich von 0 bis 4095
+            // Der Mittelwert von 0 mV wird auf den Wert 2047 (Mitte des DAC-Bereichs) gesetzt
+            float range = maxEEG - minEEG;
+            if (range == 0) range = 1;  // Sicherheitsabfrage gegen Division durch 0
+
+            // Normalisierung der Werte zwischen 0 und 1
+            double normalized = (value - minEEG) / range;
+            normalized = constrain(normalized, 0.0f, 1.0f);
+
+            // Umrechnung auf den DAC-Bereich 0-4095
+            uint16_t dacValue;
+            dacValue = static_cast<uint16_t>(normalized * 4095.0f);
+
+
+            // Ausgabe des Wertes in der Konsole zur Überprüfung
             Serial.print("Kanal ");
             Serial.print(channel);
             Serial.print(" → ");
-            Serial.print(value, 2);
+            Serial.print(value, 2);  // Wert in mV
             Serial.print(" mV → DAC-Wert: ");
-            Serial.println(intValue);
+            Serial.println(dacValue);
 
-            ausgabe(channel[0], intValue);
+            // Ausgabe des DAC-Werts an den entsprechenden Kanal
+            ausgabe(channel[3], dacValue);
+
+            // RTOS-Kooperation
             yield();
         }
-        vTaskDelay(pdMS_TO_TICKS(1000 / ausgabeFrequenzHz)); // Frequenz dynamisch
+        // Verzögerung, um die gewünschte Abspiel-Frequenz zu erreichen
+        vTaskDelay(pdMS_TO_TICKS(1000 / ausgabeFrequenzHz));
     }
 
     Serial.println("Abspielen der Daten abgeschlossen.");
     abspielTaskHandle = nullptr;
     vTaskDelete(nullptr); // Task selbst löschen
 }
+
+
 
 // Startfunktion für den Task
 void startAbspielTask() {
