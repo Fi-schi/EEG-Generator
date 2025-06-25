@@ -73,8 +73,8 @@ void abspielTask(void* parameter) {
     Serial.println("Starte Abspielen der Daten (FreeRTOS Task)...");
 
     // Hier definieren wir die Min- und Max-Werte für das EEG-Signal (in mV)
-    float minEEG = -100.0f; // mV (Minimum des EEG-Signals)
-    float maxEEG = 100.0f;  // mV (Maximum des EEG-Signals)
+    float minEEG = -150.0f; // mV (Minimum des EEG-Signals)
+    float maxEEG = 150.0f;  // mV (Maximum des EEG-Signals)
 
     // Maximale Länge aller Kanäle bestimmen
     size_t maxLength = 0;
